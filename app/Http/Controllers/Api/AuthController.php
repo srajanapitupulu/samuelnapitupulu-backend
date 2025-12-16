@@ -14,9 +14,11 @@ use Illuminate\Validation\ValidationException;
  * AuthController
  *
  * Handles user authentication operations including registration, login, and logout.
- * Uses Laravel Sanctum for API token-based authentication.
+ * Provides API endpoints for user authentication using Laravel Sanctum tokens.
+ * 
+ * @package App\Http\Controllers\Api
  */
-class AuthController extends Controller
+class AuthController extends ApiController
 {
     /**
      * Register a new user and issue an API token.
@@ -34,10 +36,14 @@ class AuthController extends Controller
 
         $token = $user->createToken('api-token')->plainTextToken;
 
-        return response()->json([
-            'token' => $token,
-            'user' => $user,
-        ], 201);
+        return $this->success(
+            [
+                'token' => $token,
+                'user' => $user,
+            ],
+            'You have registered successfully',
+            201
+        );
     }
 
     /**
@@ -59,10 +65,13 @@ class AuthController extends Controller
 
         $token = $user->createToken('api-token')->plainTextToken;
 
-        return response()->json([
-            'token' => $token,
-            'user' => $user,
-        ]);
+        return $this->success(
+            [
+                'token' => $token,
+                'user' => $user,
+            ],
+            'You have logged in successfully'
+        );
     }
 
     /**
@@ -78,18 +87,20 @@ class AuthController extends Controller
             ->where('id', $user->currentAccessToken()->id)
             ->delete();
 
-        return response()->json([
-            'message' => 'Logged out successfully.'
-        ]);
+        return $this->success(
+            null,
+            'You are now logged out'
+        );
     }
 
     public function logout_from_all_devices()
     {
         request()->user()->tokens()->delete();
 
-        return response()->json([
-            'message' => 'Logged out from all devices successfully.'
-        ]);
+        return $this->success(
+            null,
+            'You are now logged out from all devices'
+        );
     }
 
     public function me()

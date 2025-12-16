@@ -4,8 +4,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Auth\AuthenticationException;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -18,11 +18,33 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (AuthenticationException $e, Request $request) {
+        $exceptions->render(function (AuthenticationException $e, $request) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'message' => 'Unauthenticated.'
-                ], Response::HTTP_UNAUTHORIZED);
+                    'success' => false,
+                    'message' => 'Unauthenticated.',
+                    'errors' => $e->getMessage(),
+                ], 401);
             }
         });
+        $exceptions->render(function (ValidationException $e, $request) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+        });
+        $exceptions->render(function (AccessDeniedHttpException $e, $request) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Forbidden.',
+                    'errors' => $e->getMessage(),
+                ], 403);
+            }
+        });
+
+
     })->create();
