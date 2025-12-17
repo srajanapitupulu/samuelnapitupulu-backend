@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\TeamController;
 
 Route::prefix('v1')->group(function () {
 
@@ -19,6 +20,9 @@ Route::prefix('v1')->group(function () {
             return $request->user();
         });
         Route::apiResource('users', UserController::class)
+            ->except(['edit', 'create']);
+
+        Route::apiResource('teams', TeamController::class)
             ->except(['edit', 'create']);
     });
 
