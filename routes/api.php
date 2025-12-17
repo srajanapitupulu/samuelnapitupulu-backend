@@ -5,11 +5,27 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\TeamController;
+use App\Http\Controllers\Api\HierarchyController;
+use App\Models\Invitation;
 
 Route::prefix('v1')->group(function () {
 
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+
+    Route::get('invitations/accept/{token}', function ($token) {
+        $invitation = Invitation::where('token', $token)->firstOrFail();
+
+        if (!$invitation->status === 'pending') {
+            abort(403);
+        }
+
+        return response()->json([
+            'message' => 'Valid invitation',
+            'team' => $invitation->team->name,
+        ]);
+    });
+
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
@@ -24,6 +40,8 @@ Route::prefix('v1')->group(function () {
 
         Route::apiResource('teams', TeamController::class)
             ->except(['edit', 'create']);
+
+        Route::get('me/hierarchy', [HierarchyController::class, 'show']);
     });
 
 });
