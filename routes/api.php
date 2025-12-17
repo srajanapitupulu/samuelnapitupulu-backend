@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\HierarchyController;
+use App\Http\Controllers\Api\TaskController;
 use App\Models\Invitation;
 
 Route::prefix('v1')->group(function () {
@@ -42,6 +43,9 @@ Route::prefix('v1')->group(function () {
             ->except(['edit', 'create']);
 
         Route::get('me/hierarchy', [HierarchyController::class, 'show']);
+
+        Route::apiResource('tasks', TaskController::class)
+            ->only(['index', 'store', 'update']);
     });
 
 });
